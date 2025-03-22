@@ -59,7 +59,6 @@ def train_vqvae(model, train_loader, val_loader, epochs=100,
                 })
 
                 if epoch % 5 == 0 and isinstance(data, torch.Tensor):
-                    audio_samples = []
                     for i in range(min(4, data.shape[0])):
                         original_audio = data[i].cpu().numpy()
                         recon_audio = x_recon[i].detach().cpu().numpy()
@@ -72,16 +71,10 @@ def train_vqvae(model, train_loader, val_loader, epochs=100,
                         original_audio = original_audio.astype(np.float32)
                         recon_audio = recon_audio.astype(np.float32)
                         
-                        try:
-                            audio_samples.append(wandb.Audio(original_audio, sample_rate=sample_rate, caption=f"Original {i}"))
-                            audio_samples.append(wandb.Audio(recon_audio, sample_rate=sample_rate, caption=f"Reconstruction {i}"))
-                            for sample in audio_samples:
-                                wandb.log({f"epoch {epoch}": sample})
-
-                        except Exception as e:
-                            print(f"Error logging audio sample {i}: {e}")
-                            print(f"Shape: {original_audio.shape}, dtype: {original_audio.dtype}")
-                            print(f"Min: {original_audio.min()}, Max: {original_audio.max()}")            
+                        wandb.log({
+                            f"audio_original_{i}_epoch_{epoch}": wandb.Audio(original_audio, sample_rate=sample_rate, caption=f"Original {i} - Epoch {epoch}"),
+                            f"audio_reconstructed_{i}_epoch_{epoch}": wandb.Audio(recon_audio, sample_rate=sample_rate, caption=f"Reconstruction {i} - Epoch {epoch}")
+                        })
 
         avg_loss = epoch_loss / len(train_loader)
         avg_recon_loss = epoch_recon_loss / len(train_loader)
