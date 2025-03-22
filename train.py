@@ -113,7 +113,7 @@ def train_vqvae(model, train_loader, val_loader, epochs=100,
         
         print(f"Epoch [{epoch+1}/{epochs}], Train loss: {avg_loss:.4f}, Val loss: {avg_val_loss:.4f}, Recon loss: {avg_recon_loss:.4f}, VQ loss: {avg_vq_loss:.4f}")
         
-        if (epoch + 1) % 10 == 0 or (epoch + 1) == epochs:
+        if (epoch + 1) % 2 == 0 or (epoch + 1) == epochs:
             checkpoint_path = os.path.join(save_path, f'vqvae_epoch_{epoch+1}.pth')
             torch.save({
                 'epoch': epoch + 1,

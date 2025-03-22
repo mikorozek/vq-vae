@@ -18,7 +18,7 @@ val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_w
 
 wandb.login()
 
-vqvae_model = VQVAE(in_channels=1, hidden_dim=128, codebook_size=1024, embedding_dim=512, commitment_cost=0.25)
+vqvae_model = VQVAE(in_channels=1, hidden_dim=128, codebook_size=2048, embedding_dim=512, commitment_cost=0.25)
 
 model, train_losses, recon_losses, vq_losses, val_losses = train_vqvae(
     model=vqvae_model,
