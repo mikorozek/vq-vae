@@ -50,7 +50,7 @@ def train_vqvae(model, train_loader, val_loader, epochs=100,
             epoch_recon_loss += recon_loss.item()
             epoch_vq_loss += vq_loss.item()
             
-            if batch_idx % 100 == 0:
+            if batch_idx % 500 == 0:
                 wandb.log({
                     "batch": batch_idx + epoch * len(train_loader),
                     "batch_loss": loss.item(),
@@ -58,23 +58,22 @@ def train_vqvae(model, train_loader, val_loader, epochs=100,
                     "batch_vq_loss": vq_loss.item()
                 })
 
-                if epoch % 5 == 0 and isinstance(data, torch.Tensor):
-                    for i in range(min(4, data.shape[0])):
-                        original_audio = data[i].cpu().numpy()
-                        recon_audio = x_recon[i].detach().cpu().numpy()
+                for i in range(min(4, data.shape[0])):
+                    original_audio = data[i].cpu().numpy()
+                    recon_audio = x_recon[i].detach().cpu().numpy()
+                    
+                    if len(original_audio.shape) > 1:
+                        original_audio = original_audio.squeeze()  # Remove singleton dimensions
+                    if len(recon_audio.shape) > 1:
+                        recon_audio = recon_audio.squeeze()
                         
-                        if len(original_audio.shape) > 1:
-                            original_audio = original_audio.squeeze()  # Remove singleton dimensions
-                        if len(recon_audio.shape) > 1:
-                            recon_audio = recon_audio.squeeze()
-                            
-                        original_audio = original_audio.astype(np.float32)
-                        recon_audio = recon_audio.astype(np.float32)
-                        
-                        wandb.log({
-                            f"audio_original_{i}_epoch_{epoch}": wandb.Audio(original_audio, sample_rate=sample_rate, caption=f"Original {i} - Epoch {epoch}"),
-                            f"audio_reconstructed_{i}_epoch_{epoch}": wandb.Audio(recon_audio, sample_rate=sample_rate, caption=f"Reconstruction {i} - Epoch {epoch}")
-                        })
+                    original_audio = original_audio.astype(np.float32)
+                    recon_audio = recon_audio.astype(np.float32)
+                    
+                    wandb.log({
+                        f"audio_original_{i}_epoch_{epoch}": wandb.Audio(original_audio, sample_rate=sample_rate, caption=f"Original {i} - Epoch {epoch}"),
+                        f"audio_reconstructed_{i}_epoch_{epoch}": wandb.Audio(recon_audio, sample_rate=sample_rate, caption=f"Reconstruction {i} - Epoch {epoch}")
+                    })
 
         avg_loss = epoch_loss / len(train_loader)
         avg_recon_loss = epoch_recon_loss / len(train_loader)
