@@ -123,8 +123,10 @@ def train_vqvae(model, train_loader, val_loader, epochs=100,
                 'loss': avg_loss,
             }, checkpoint_path)
             
-            wandb.save(checkpoint_path)
-    
+            wandb.log({"checkpoint": wandb.Artifact(name=f"model-checkpoint-epoch-{epoch+1}", 
+                                                    type="model", 
+                                                    description=f"Model checkpoint at epoch {epoch+1}")
+                                     .add_file(checkpoint_path)})    
     wandb.finish()
             
     return model, train_losses, recon_losses, vq_losses, val_losses
