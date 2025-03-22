@@ -82,6 +82,7 @@ def train_vqvae(model, train_loader, val_loader, epochs=100,
                             print(f"Error logging audio sample {i}: {e}")
                             print(f"Shape: {original_audio.shape}, dtype: {original_audio.dtype}")
                             print(f"Min: {original_audio.min()}, Max: {original_audio.max()}")            
+
         avg_loss = epoch_loss / len(train_loader)
         avg_recon_loss = epoch_recon_loss / len(train_loader)
         avg_vq_loss = epoch_vq_loss / len(train_loader)
@@ -118,7 +119,6 @@ def train_vqvae(model, train_loader, val_loader, epochs=100,
             "val_vq_loss": avg_val_vq_loss
         })
         
-            
         print(f"Epoch [{epoch+1}/{epochs}], Train loss: {avg_loss:.4f}, Val loss: {avg_val_loss:.4f}, Recon loss: {avg_recon_loss:.4f}, VQ loss: {avg_vq_loss:.4f}")
         
         if (epoch + 1) % 10 == 0 or (epoch + 1) == epochs:
