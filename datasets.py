@@ -24,3 +24,5 @@ class VCTKFixed(Dataset):
 
         if torch.max(torch.abs(waveform)) > 0:
             waveform = waveform / torch.max(torch.abs(waveform))
+
+        return waveform
