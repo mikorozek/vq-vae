@@ -64,26 +64,20 @@ def train_vqvae(model, train_loader, val_loader, epochs=100,
                         original_audio = data[i].cpu().numpy()
                         recon_audio = x_recon[i].detach().cpu().numpy()
                         
-                        # Ensure 1D for mono audio or reshape appropriately
                         if len(original_audio.shape) > 1:
                             original_audio = original_audio.squeeze()  # Remove singleton dimensions
                         if len(recon_audio.shape) > 1:
                             recon_audio = recon_audio.squeeze()
                             
-                        # Ensure float32 dtype
                         original_audio = original_audio.astype(np.float32)
                         recon_audio = recon_audio.astype(np.float32)
                         
-                        # Normalize to [-1, 1]
-                        if original_audio.max() > 1.0 or original_audio.min() < -1.0:
-                            original_audio = original_audio / max(abs(original_audio.max()), abs(original_audio.min()))
-                        if recon_audio.max() > 1.0 or recon_audio.min() < -1.0:
-                            recon_audio = recon_audio / max(abs(recon_audio.max()), abs(recon_audio.min()))
-                        
-                        # Add a try-except block to help debug
                         try:
                             audio_samples.append(wandb.Audio(original_audio, sample_rate=sample_rate, caption=f"Original {i}"))
                             audio_samples.append(wandb.Audio(recon_audio, sample_rate=sample_rate, caption=f"Reconstruction {i}"))
+                            for sample in audio_samples:
+                                wandb.log({f"epoch {epoch}": sample})
+
                         except Exception as e:
                             print(f"Error logging audio sample {i}: {e}")
                             print(f"Shape: {original_audio.shape}, dtype: {original_audio.dtype}")
