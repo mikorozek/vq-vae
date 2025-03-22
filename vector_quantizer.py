@@ -15,8 +15,7 @@ class VectorQuantizer(nn.Module):
         with torch.no_grad():
             self.embeddings.weight.uniform_(-limit, limit)
 
-    def __call__(self, inputs, is_training):
-        inputs_shape = inputs.shape
+    def __call__(self, inputs):
         inputs = inputs.permute(0, 2, 1).contiguous()
         flat_inputs = inputs.view(-1, self.embedding_dim)
 
