@@ -1,5 +1,6 @@
 import torch.optim as optim
 import torch
+import numpy as np
 import wandb
 import os
 
@@ -62,19 +63,31 @@ def train_vqvae(model, train_loader, val_loader, epochs=100,
                     for i in range(min(4, data.shape[0])):
                         original_audio = data[i].cpu().numpy()
                         recon_audio = x_recon[i].detach().cpu().numpy()
-
+                        
+                        # Ensure 1D for mono audio or reshape appropriately
+                        if len(original_audio.shape) > 1:
+                            original_audio = original_audio.squeeze()  # Remove singleton dimensions
+                        if len(recon_audio.shape) > 1:
+                            recon_audio = recon_audio.squeeze()
+                            
+                        # Ensure float32 dtype
+                        original_audio = original_audio.astype(np.float32)
+                        recon_audio = recon_audio.astype(np.float32)
+                        
+                        # Normalize to [-1, 1]
                         if original_audio.max() > 1.0 or original_audio.min() < -1.0:
                             original_audio = original_audio / max(abs(original_audio.max()), abs(original_audio.min()))
-
                         if recon_audio.max() > 1.0 or recon_audio.min() < -1.0:
                             recon_audio = recon_audio / max(abs(recon_audio.max()), abs(recon_audio.min()))
-
-
-                        audio_samples.append(wandb.Audio(original_audio, sample_rate=sample_rate, caption=f"Original {i}"))
-                        audio_samples.append(wandb.Audio(recon_audio, sample_rate=sample_rate, caption=f"Reconstruction {i}"))
-
-                        wandb.log({"audio_examples": audio_samples})
-            
+                        
+                        # Add a try-except block to help debug
+                        try:
+                            audio_samples.append(wandb.Audio(original_audio, sample_rate=sample_rate, caption=f"Original {i}"))
+                            audio_samples.append(wandb.Audio(recon_audio, sample_rate=sample_rate, caption=f"Reconstruction {i}"))
+                        except Exception as e:
+                            print(f"Error logging audio sample {i}: {e}")
+                            print(f"Shape: {original_audio.shape}, dtype: {original_audio.dtype}")
+                            print(f"Min: {original_audio.min()}, Max: {original_audio.max()}")            
         avg_loss = epoch_loss / len(train_loader)
         avg_recon_loss = epoch_recon_loss / len(train_loader)
         avg_vq_loss = epoch_vq_loss / len(train_loader)
